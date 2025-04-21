@@ -11,4 +11,6 @@ PyPDF2==3.0.1
 google-generativeai
 openpyxl
 gunicorn
+django-cors-headers
+python-dotenv
 
