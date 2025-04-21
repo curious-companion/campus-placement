@@ -78,7 +78,7 @@ const ResumeUpload = () => {
 
         try {
             setResumeParseLoading(true);
-            const res = await fetch('http://localhost:8000/ats/upload/', {
+            const res = await fetch('https://talent-trajectory.onrender.com/ats/upload/', {
                 method: 'POST',
                 body: formData,
             });
