@@ -3,6 +3,7 @@ import os
 import pickle
 from uuid import uuid4
 import traceback
+import logging
 # Prepared data in the format required by deployed model
 
 
@@ -103,6 +104,9 @@ def convert_is_placed_to_zero_ifnot_placed(is_placed, salary):
     return salary
 
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(levelname)s:%(message)s')
+
 def check_columns_and_datatypes(excel_file):
     expected_columns = [
         "s_id", "name", "tier", "gender", "branch", "cgpa", "inter_gpa",
@@ -118,36 +122,56 @@ def check_columns_and_datatypes(excel_file):
         "dsa": int, "mobile_dev": int, "web_dev": int, "Machine Learning": int,
         "cloud": int, "other_skills": str
     }
+
     try:
+        logging.debug("Checking file type...")
+
         if excel_file.name.endswith(".xlsx"):
             df = pd.read_excel(excel_file)
+            logging.debug("Loaded Excel file successfully.")
         elif excel_file.name.endswith(".csv"):
             df = pd.read_csv(excel_file)
+            logging.debug("Loaded CSV file successfully.")
         else:
+            logging.error("Unsupported file format.")
             return True, 'Please upload .csv or .xlsx file only.'
+
+        logging.debug(f"File contains columns: {list(df.columns)}")
+
         if set(expected_columns) != set(df.columns):
+            logging.error("Column names do not match expected format.")
             return True, 'Column names not matched in the uploaded file.'
 
-        # Check for null values in the DataFrame
-        null_check = df.drop(
-            columns=['other_skills', 'name']).isnull().values.any()
+        logging.debug("Checking for null values (excluding 'name' and 'other_skills')...")
+        null_check = df.drop(columns=['other_skills', 'name']).isnull().values.any()
 
         if null_check:
-            # There are null values in the file
+            logging.warning("Null values found in required fields.")
             return True, 'File contains empty/null cells. Fill data completely.'
 
-        try:
-            for column, datatype in expected_datatypes.items():
-                if column in df.columns and df[column].dtype != datatype:
-                    df[column] = df[column].astype(datatype)
-        except:
-            return True, column + ' has invalid data type.'
+        logging.debug("Checking and converting column data types...")
+        for column, datatype in expected_datatypes.items():
+            if column in df.columns:
+                current_dtype = df[column].dtype
+                logging.debug(f"Column '{column}' has dtype {current_dtype}; expected {datatype}.")
+                try:
+                    if datatype == int:
+                        df[column] = pd.to_numeric(df[column], errors='raise').astype(int)
+                    elif datatype == float:
+                        df[column] = pd.to_numeric(df[column], errors='raise').astype(float)
+                    elif datatype == str:
+                        df[column] = df[column].astype(str)
+                except Exception as e:
+                    logging.error(f"Failed to convert column '{column}' to {datatype}. Error: {str(e)}")
+                    return True, f'{column} has invalid data type.'
 
+        logging.info("File passed all checks successfully.")
         return False, ''
-    except Exception as e:
-        print("An error occurred:", traceback.format_exc())
-        return True, 'Something is wrong in the uploaded file.'
 
+    except Exception as e:
+        logging.critical("An exception occurred during file validation.")
+        logging.critical(traceback.format_exc())
+        return True, 'Something is wrong in the uploaded file.'
 
 def delete_file(pathname):
     try:

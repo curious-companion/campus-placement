@@ -1,4 +1,4 @@
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Header } from '../../components/header';
 import { UploadBox } from '../campus/UploadBox';
 import { motion } from 'framer-motion';

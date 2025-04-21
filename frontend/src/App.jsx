@@ -6,6 +6,7 @@ import { AppContextProvider } from './contexts/AppContext'
 import { PageNotFound } from './pages/notfound'
 import { Student } from './pages/student'
 import  ResumeUpload  from './pages/resume/resume.jsx'; // ✅ Already imported
+import { Analytics } from '@vercel/analytics/react'
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,7 @@ function App() {
   return (
     <AppContextProvider>
       <RouterProvider router={router} />
+      <Analytics />
     </AppContextProvider>
   )
 }
