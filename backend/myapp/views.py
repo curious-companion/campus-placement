@@ -2,6 +2,7 @@ from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.core.files.storage import FileSystemStorage
+from dotenv import load_dotenv
 import google.generativeai as genai
 import requests
 import json
@@ -11,8 +12,9 @@ import threading
 from .utils import deleteTempFiles, check_columns_and_datatypes, delete_file
 from .predict import predict_college_stats, predict_students_placement
 
-# Initialize API once globally
-genai.configure(api_key="AIzaSyAl5RUjoGI7hbggV4JA5Ll3PJDZwqb0j20")
+load_dotenv()
+genai_api_key = os.getenv("GENAI_API_KEY")
+genai.configure(api_key=genai_api_key)
 
 # Delete temp files on startup
 deleteTempFiles()
